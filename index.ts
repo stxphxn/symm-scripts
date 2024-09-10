@@ -20,7 +20,7 @@ const PROVIDER = new ethers.JsonRpcProvider(process.env.RPC_URL as string);
 
 const WALLET = new ethers.Wallet(process.env.PRIVATE_KEY as string, PROVIDER);
 
-const ADDRESS = WALLET.address;
+const ADDRESS = "0x169833EBB85FBD3cb67eeC73Ed02f738c0017951";
 
 const MAX_UINT256 =
   "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
@@ -29,18 +29,20 @@ const VAULT_ADDRESS = "0xbccc4b4c6530F82FE309c5E845E50b5E9C89f2AD";
 
 const vaultContract = new ethers.Contract(VAULT_ADDRESS, VaultABI, WALLET);
 
+const vaultInterface = new ethers.Interface(VaultABI);
+
 const POOL_ID =
-  "0x058d4893efa235d86cceed5a7eef0809b76c8c66000000000000000000000004"; //USDC/USDT
-const TOKEN_1 = "0x8D97Cea50351Fb4329d591682b148D43a0C3611b"; //USDC
-const TOKEN_2 = "0x975Ed13fa16857E83e7C493C7741D556eaaD4A3f"; //USDT
+  "0x9a77bd2edbbb68173275cda967b76e9213949ace000000000000000000000008"; //STLOS/WTLOS
+const TOKEN_1 = "0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905"; //STLOS
+const TOKEN_2 = "0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E"; //WTLOS
 
-const TOKEN_1_DECIMALS = 6;
-const TOKEN_2_DECIMALS = 6;
+const TOKEN_1_DECIMALS = 18;
+const TOKEN_2_DECIMALS = 18;
 
-const TOKEN_1_AMOUNT = ethers.parseUnits("1", TOKEN_1_DECIMALS);
-const TOKEN_2_AMOUNT = ethers.parseUnits("1", TOKEN_2_DECIMALS);
+const TOKEN_1_AMOUNT = ethers.parseUnits("70", TOKEN_1_DECIMALS);
+const TOKEN_2_AMOUNT = ethers.parseUnits("85", TOKEN_2_DECIMALS);
 
-const NUMBER_OF_SWAPS = 2;
+const NUMBER_OF_SWAPS = 10;
 
 async function main() {
   const funds = {
@@ -63,19 +65,28 @@ async function main() {
       userData: "0x",
     });
   }
+  // await (
+  //   await vaultContract.batchSwap(
+  //     0,
+  //     swaps,
+  //     [TOKEN_1, TOKEN_2],
+  //     funds,
+  //     limits,
+  //     MAX_UINT256,
+  //     { value: 0 }
+  //   )
+  // ).wait();
+  const data = vaultInterface.encodeFunctionData("batchSwap", [
+    0,
+    swaps,
+    [TOKEN_1, TOKEN_2],
+    funds,
+    limits,
+    MAX_UINT256,
+  ]);
 
-  await (
-    await vaultContract.batchSwap(
-      0,
-      swaps,
-      [TOKEN_1, TOKEN_2],
-      funds,
-      limits,
-      MAX_UINT256,
-      { value: 0 }
-    )
-  ).wait();
-  console.log("Swapped", swaps.length, "times");
+  console.log("Data", data);
+  //console.log("Swapped", swaps.length, "times");
 }
 
 main()
